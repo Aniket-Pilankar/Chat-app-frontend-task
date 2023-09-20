@@ -1,13 +1,13 @@
-import React from 'react'
+import { Tab, Tabs } from '@mui/material';
 
-import { Paper, Tab, Tabs } from '@mui/material'
-
-import TabPanel from '../../shared-components/TabPanel'
-import { Root, StyledPaper } from './styles'
-import useHomeVM from './vm'
+import Login from '../../components/Login';
+import SignUp from '../../components/SignUp';
+import TabPanel from '../../shared-components/TabPanel';
+import { Root, StyledPaper } from './styles';
+import useHomeVM from './vm';
 
 const Home = () => {
-  const { handleChange, value } = useHomeVM()
+  const { handleChange, value } = useHomeVM();
 
   return (
     <Root>
@@ -17,14 +17,14 @@ const Home = () => {
           <Tab label="SignUp" />
         </Tabs>
         <TabPanel value={value} index={0}>
-          A
+          <Login />
         </TabPanel>
         <TabPanel value={value} index={1}>
-          B
+          <SignUp />
         </TabPanel>
       </StyledPaper>
     </Root>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
