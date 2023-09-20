@@ -1,13 +1,20 @@
+import { Navigate } from 'react-router-dom';
+
 import { Tab, Tabs } from '@mui/material';
 
 import Login from '../../components/Login';
 import SignUp from '../../components/SignUp';
 import TabPanel from '../../shared-components/TabPanel';
+import { routes } from '../routes';
 import { Root, StyledPaper } from './styles';
 import useHomeVM from './vm';
 
 const Home = () => {
-  const { handleChange, value } = useHomeVM();
+  const { handleChange, value, session } = useHomeVM();
+
+  if (session?.token) {
+    return <Navigate to={routes.chats} />;
+  }
 
   return (
     <Root>

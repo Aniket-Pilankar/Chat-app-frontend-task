@@ -1,4 +1,9 @@
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { tryLogin } from '../../db/auth/thunk-request';
+import { useAppDispatch } from '../../db/types';
+import { routes } from '../../pages/routes';
 
 const initialState = {
   email: '',
@@ -6,6 +11,9 @@ const initialState = {
 };
 
 export default function useLoginVM() {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
   const [form, setForm] = useState(initialState);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -17,5 +25,14 @@ export default function useLoginVM() {
     }));
   };
 
-  return { form, setForm, handleChange };
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    console.log(form);
+
+    await dispatch(tryLogin(form));
+    navigate(routes.chats);
+  };
+
+  return { form, setForm, handleChange, handleSubmit };
 }

@@ -1,4 +1,7 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useState } from 'react';
+
+import { trySignIn } from '../../db/auth/thunk-request';
+import { useAppDispatch } from '../../db/types';
 
 const initialState = {
   name: '',
@@ -7,6 +10,8 @@ const initialState = {
 };
 
 export default function useSignUpVM() {
+  const dispatch = useAppDispatch();
+
   const [formData, setFormData] = useState(initialState);
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -20,5 +25,19 @@ export default function useSignUpVM() {
     }));
   };
 
-  return { handleChange, formData, handleClickShowPassword, showPassword };
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    console.log('formData', formData);
+
+    await dispatch(trySignIn(formData));
+  };
+
+  return {
+    handleChange,
+    formData,
+    handleClickShowPassword,
+    showPassword,
+    handleSubmit,
+  };
 }

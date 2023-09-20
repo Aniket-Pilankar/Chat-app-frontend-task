@@ -13,10 +13,11 @@ import { StyledForm } from './styles';
 import useSignUpVM from './vm';
 
 const SignUp = () => {
-  const { handleChange, formData, handleClickShowPassword, showPassword } = useSignUpVM();
+  const { handleChange, formData, handleClickShowPassword, showPassword, handleSubmit } =
+    useSignUpVM();
 
   return (
-    <StyledForm>
+    <StyledForm onSubmit={handleSubmit}>
       <TextField required name="name" value={formData.name} onChange={handleChange} label="Name" />
       <TextField
         required
@@ -50,7 +51,9 @@ const SignUp = () => {
           label="Password"
         />
       </FormControl>
-      <Button variant="contained">Sign Up</Button>
+      <Button variant="contained" type="submit">
+        Sign Up
+      </Button>
     </StyledForm>
   );
 };
