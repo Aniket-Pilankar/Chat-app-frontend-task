@@ -9,3 +9,10 @@ export const StyledStack = styled((props: StackProps) => (
   overflowY: 'hidden',
   backgroundColor: '#E8E8E8',
 }));
+
+export const StyledWrapper = styled('div')(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  overflowY: 'scroll',
+  scrollbarWidth: 'none',
+}));

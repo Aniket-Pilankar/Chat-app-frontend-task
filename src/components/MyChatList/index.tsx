@@ -38,6 +38,14 @@ const MyChatList = ({ fetchAgain }: Props) => {
               <Typography variant="body1">
                 {!chat.isGroupChat ? getSender(user, chat.users) : chat.chatName}
               </Typography>
+              {/* {chat.latestMessage && (
+              <Typography fontSize="xs">
+                <b>{chat.latestMessage.sender.name} : </b>
+                {chat.latestMessage.content.length > 50
+                  ? chat.latestMessage.content.substring(0, 51) + '...'
+                  : chat.latestMessage.content}
+              </Typography>
+            )} */}
             </StyledBox>
           ))}
         </StyledStack>

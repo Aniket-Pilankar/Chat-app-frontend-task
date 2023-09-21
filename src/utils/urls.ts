@@ -4,4 +4,6 @@ export const urls = Object.freeze({
   users: '/api/user',
   chats: '/api/chat',
   createGroup: '/api/chat/group',
+  sendMessage: '/api/message',
+  getAllMessage: (chatId: string) => `/api/message/${chatId}`,
 });
