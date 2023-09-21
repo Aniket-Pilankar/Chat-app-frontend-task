@@ -1,5 +1,6 @@
 import { createReducer } from '@reduxjs/toolkit';
 
+import { trylogout } from './actions';
 import { getSession } from './session';
 import { tryLogin } from './thunk-request';
 import { UserSession } from './types';
@@ -25,6 +26,9 @@ const authReducer = createReducer(initialState, (builder) => {
     state.session = {
       ...action.payload,
     };
+  });
+  builder.addCase(trylogout, (state, action) => {
+    state.session = null;
   });
 });
 

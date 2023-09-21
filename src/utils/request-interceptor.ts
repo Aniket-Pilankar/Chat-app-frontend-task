@@ -1,10 +1,18 @@
+import { store } from '../db/store';
 import request from './request';
 
 export default function registerInterceptors() {
+  const {
+    auth: { session },
+  } = store.getState();
+
   // Add a request interceptor
   request.interceptors.request.use(
     function (config) {
       const header = config.headers;
+
+      let token = session?.token;
+      header.Authorization = `Bearer ${token}`;
 
       return config;
     },

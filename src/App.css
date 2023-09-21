@@ -8,3 +8,7 @@ body {
   background-color: bisque;
   font-family: 'Inter', sans-serif;
 }
+
+#root{
+  width: 100%;
+}
