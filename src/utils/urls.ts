@@ -3,4 +3,5 @@ export const urls = Object.freeze({
   signUp: 'user/signUp',
   users: '/api/user',
   chats: '/api/chat',
+  createGroup: '/api/chat/group',
 });

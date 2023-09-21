@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 
 import { Stack } from '@mui/material';
 
+import Chatbox from '../../components/Chatbox';
 import Header from '../../components/Header';
 import MyChatList from '../../components/MyChatList';
 import { routes } from '../routes';
@@ -9,15 +11,19 @@ import useChatVM from './vm';
 
 const Chat = () => {
   const { session } = useChatVM();
+  const [fetchAgain, setFetchAgain] = useState(false);
 
-  if (!session) return <Navigate to={routes.home} />;
+  if (!session?.token) return <Navigate to={routes.home} />;
 
   const { user } = session;
 
   return (
-    <div>
+    <div style={{ height: '100%' }}>
       {user && <Header />}
-      <Stack width={'30%'}>{user && <MyChatList />}</Stack>
+      <Stack width={'100%'} height={'100%'} direction={'row'} gap={3}>
+        {user && <MyChatList fetchAgain={fetchAgain} />}
+        {user && <Chatbox fetchAgain={fetchAgain} setFetchAgain={setFetchAgain} />}
+      </Stack>
     </div>
   );
 };

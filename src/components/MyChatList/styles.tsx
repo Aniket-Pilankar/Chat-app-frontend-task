@@ -6,6 +6,7 @@ export const StyledPaper = styled(Paper)(({ theme }) => ({
   gap: 10,
   padding: theme.spacing(2),
   width: '100%',
+  height: '100%',
 }));
 
 export const StyledStack = styled((props: StackProps) => <Stack gap={1} {...props} />)(

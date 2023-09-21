@@ -12,7 +12,10 @@ export default function registerInterceptors() {
       const header = config.headers;
 
       let token = session?.token;
-      header.Authorization = `Bearer ${token}`;
+      console.log('token:23222', token);
+      if (token) {
+        header.Authorization = `Bearer ${token}`;
+      }
 
       return config;
     },

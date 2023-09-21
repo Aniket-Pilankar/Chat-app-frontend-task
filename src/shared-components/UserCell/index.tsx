@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { MouseEvent } from 'react';
 
 import { Avatar, Typography } from '@mui/material';
 
@@ -7,12 +7,12 @@ import { Root } from './styles';
 
 interface Props {
   user: UserSession['user'];
-  handleFunction: () => void;
+  handleFunction: (e: MouseEvent<HTMLDivElement>) => void;
 }
 
 const UserCell = ({ user, handleFunction }: Props) => {
   return (
-    <Root component="button" onClick={handleFunction}>
+    <Root onClick={(e) => handleFunction(e)}>
       <Avatar alt={user.name} src={user.pic} />
       <div>
         <Typography>{user.name}</Typography>
