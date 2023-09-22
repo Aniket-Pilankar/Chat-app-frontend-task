@@ -1,6 +1,9 @@
 import React, { ChangeEvent, KeyboardEventHandler, useEffect, useState } from 'react';
 
 import { CircularProgress, FormControl, TextField, Typography } from '@mui/material';
+import { DefaultEventsMap } from '@socket.io/component-emitter';
+
+import io, { Socket } from 'socket.io-client';
 
 import { getMessagesById, sendMessageRequest } from '../../db/chat/thunk-request';
 import { API } from '../../db/shared/api-response';
@@ -9,6 +12,9 @@ import { getSender } from '../../utils/helper';
 import ScrollableChat from '../ScrollableChat';
 import { StyledStack, StyledWrapper } from './styles';
 import useSingleChatVMProps, { VMProps } from './vm';
+
+const ENDPOINT = 'http://localhost:4001';
+let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 
 interface Props extends VMProps {}
 
@@ -20,26 +26,12 @@ const SingleChat = ({ fetchAgain, setFetchAgain }: Props) => {
   const [messages, setMessages] = useState<API.SendMessageResponse[] | API.IFetchMessagesById>([]);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState('');
+  const [socketConnected, setSocketConnected] = useState(false);
 
   const typingHandler = (e: ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
 
-    // if (!socketConnected) return;
-
-    // if (!typing) {
-    //   setTyping(true);
-    //   socket.emit("typing", selectedChat._id);
-    // }
-    // let lastTypingTime = new Date().getTime();
-    // var timerLength = 3000;
-    // setTimeout(() => {
-    //   var timeNow = new Date().getTime();
-    //   var timeDiff = timeNow - lastTypingTime;
-    //   if (timeDiff >= timerLength && typing) {
-    //     socket.emit("stop typing", selectedChat._id);
-    //     setTyping(false);
-    //   }
-    // }, timerLength);
+    if (!socketConnected) return;
   };
 
   const fetchMessages = async () => {
@@ -52,7 +44,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }: Props) => {
 
       setMessages(data);
 
-      // socket.emit('join chat', selectedChat._id);
+      socket.emit('join chat', selectedChat._id);
     } catch (error) {
       console.log('error:', error);
     } finally {
@@ -76,7 +68,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }: Props) => {
             chatId: selectedChat._id,
           }),
         ).unwrap();
-        // socket.emit("new message", data);
+        socket.emit('new message', data);
         setMessages([...messages, data]);
       } catch (error) {
         console.log('error:', error);
@@ -86,12 +78,24 @@ const SingleChat = ({ fetchAgain, setFetchAgain }: Props) => {
 
   useEffect(() => {
     fetchMessages();
-
-    // selectedChatCompare = selectedChat;
-    // eslint-disable-next-line
   }, [selectedChat]);
 
   useEffect(() => console.log(messages), [messages]);
+
+  useEffect(() => {
+    socket = io(ENDPOINT);
+    socket.emit('setup', user);
+    console.log(user?._id);
+    socket.on('connected', () => setSocketConnected(true));
+
+    // eslint-disable-next-line
+  }, []);
+
+  useEffect(() => {
+    socket.on('message recieved', (newMessageRecieved) => {
+      setMessages([...messages, newMessageRecieved]);
+    });
+  });
 
   if (!selectedChat) return <Typography variant="h5">Click on a user to start chatting</Typography>;
 
