@@ -22,4 +22,5 @@ export interface SelectedChat {
   chatName: string;
   isGroupChat: boolean;
   users: UserSession['user'][];
+  groupAdmin?: UserSession['user'];
 }

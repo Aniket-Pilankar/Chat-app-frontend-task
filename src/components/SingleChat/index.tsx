@@ -1,6 +1,14 @@
-import React, { ChangeEvent, KeyboardEventHandler, useEffect, useState } from 'react';
+import React, { ChangeEvent, KeyboardEventHandler, useCallback, useEffect, useState } from 'react';
 
-import { CircularProgress, FormControl, TextField, Typography } from '@mui/material';
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import {
+  CircularProgress,
+  FormControl,
+  IconButton,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { DefaultEventsMap } from '@socket.io/component-emitter';
 
 import io, { Socket } from 'socket.io-client';
@@ -10,18 +18,22 @@ import { API } from '../../db/shared/api-response';
 import { useAppDispatch } from '../../db/types';
 import { getSender } from '../../utils/helper';
 import ScrollableChat from '../ScrollableChat';
+import UpdateGroupChatModal from '../UpdateGroupChatModal';
 import { StyledStack, StyledWrapper } from './styles';
-import useSingleChatVMProps, { VMProps } from './vm';
+import useSingleChatVMProps from './vm';
 
 const ENDPOINT = 'http://localhost:4001';
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 
-interface Props extends VMProps {}
+interface Props {
+  fetchAgain: boolean;
+  setFetchAgain: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
 const SingleChat = ({ fetchAgain, setFetchAgain }: Props) => {
   const dispatch = useAppDispatch();
 
-  const { selectedChat, user } = useSingleChatVMProps();
+  const { selectedChat, user, open, handleClose, handleOpen } = useSingleChatVMProps();
 
   const [messages, setMessages] = useState<API.SendMessageResponse[] | API.IFetchMessagesById>([]);
   const [loading, setLoading] = useState(false);
@@ -34,7 +46,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }: Props) => {
     if (!socketConnected) return;
   };
 
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     if (!selectedChat) return;
 
     try {
@@ -44,13 +56,13 @@ const SingleChat = ({ fetchAgain, setFetchAgain }: Props) => {
 
       setMessages(data);
 
-      socket.emit('join chat', selectedChat._id);
+      // socket.emit('join chat', selectedChat._id);
     } catch (error) {
       console.log('error:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [dispatch, selectedChat]);
 
   const sendMessage: KeyboardEventHandler<HTMLDivElement> = async (event) => {
     if (!selectedChat) {
@@ -68,7 +80,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }: Props) => {
             chatId: selectedChat._id,
           }),
         ).unwrap();
-        socket.emit('new message', data);
+        // socket.emit('new message', data);
         setMessages([...messages, data]);
       } catch (error) {
         console.log('error:', error);
@@ -78,7 +90,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }: Props) => {
 
   useEffect(() => {
     fetchMessages();
-  }, [selectedChat]);
+  }, [fetchMessages, selectedChat]);
 
   useEffect(() => console.log(messages), [messages]);
 
@@ -91,19 +103,28 @@ const SingleChat = ({ fetchAgain, setFetchAgain }: Props) => {
     // eslint-disable-next-line
   }, []);
 
-  useEffect(() => {
-    socket.on('message recieved', (newMessageRecieved) => {
-      setMessages([...messages, newMessageRecieved]);
-    });
-  });
+  // useEffect(() => {
+  //   socket.on('message recieved', (newMessageRecieved) => {
+  //     setMessages([...messages, newMessageRecieved]);
+  //   });
+  // });
 
   if (!selectedChat) return <Typography variant="h5">Click on a user to start chatting</Typography>;
 
   return (
     <>
-      <Typography>
-        {selectedChat?.isGroupChat ? null : getSender(user, selectedChat.users)}
-      </Typography>
+      <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
+        <Typography>
+          {selectedChat?.isGroupChat
+            ? selectedChat.chatName.toUpperCase()
+            : getSender(user, selectedChat.users)}
+        </Typography>
+        {selectedChat?.isGroupChat && (
+          <IconButton onClick={handleOpen}>
+            <RemoveRedEyeIcon />
+          </IconButton>
+        )}
+      </Stack>
       <StyledStack>
         {loading ? (
           <CircularProgress sx={{ alignSelf: 'center', margin: 'auto' }} />
@@ -116,6 +137,13 @@ const SingleChat = ({ fetchAgain, setFetchAgain }: Props) => {
           <TextField placeholder="Enter a message.." value={newMessage} onChange={typingHandler} />
         </FormControl>
       </StyledStack>
+      <UpdateGroupChatModal
+        isOpen={open}
+        onClose={handleClose}
+        fetchAgain={fetchAgain}
+        setFetchAgain={setFetchAgain}
+        fetchMessages={fetchMessages}
+      />
     </>
   );
 };

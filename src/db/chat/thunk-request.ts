@@ -46,6 +46,47 @@ export const createGroup = createAsyncThunk(
   },
 );
 
+interface AddToGroup {
+  chatId: string;
+  userId: string;
+}
+
+export const addToGroup = createAsyncThunk('chat/group/addMember', async (payload: AddToGroup) => {
+  const response = await request.put(urls.addToGroup, payload);
+  console.log('response', response);
+  return response.data;
+});
+
+interface RemoveFromGroup {
+  chatId: string;
+  userId: string;
+  loggedInUserId: string;
+}
+
+export const removeFromGroup = createAsyncThunk(
+  'chat/group/removeMember',
+  async (payload: RemoveFromGroup) => {
+    const { loggedInUserId, chatId, userId } = payload;
+    const response = await request.put(urls.removeUserFromGroup, { chatId, userId });
+    console.log('response', response);
+    return { ...response.data, removedUserId: userId, loggedInUserId };
+  },
+);
+
+interface RenameGroupRequest {
+  chatId: string;
+  chatName: string;
+}
+
+export const renameGroup = createAsyncThunk(
+  'chat/group/rename',
+  async (payload: RenameGroupRequest) => {
+    const response = await request.put(urls.renameGroup, payload);
+    console.log('response', response);
+    return response.data;
+  },
+);
+
 export const sendMessageRequest = createAsyncThunk(
   'chat/message/send',
   async (payload: { content: string; chatId: string }) => {

@@ -2,7 +2,15 @@ import { createReducer, PayloadAction } from '@reduxjs/toolkit';
 
 import { SelectedChat } from '../types';
 import { selectedChatCreateAction } from './action';
-import { accessChats, createGroup, fetchChats } from './thunk-request';
+import {
+  accessChats,
+  addToGroup,
+  createGroup,
+  fetchChats,
+  removeFromGroup,
+  renameGroup,
+} from './thunk-request';
+import { selectSession } from '../auth/selector';
 
 interface InitialState {
   selectedChat: SelectedChat | null;
@@ -32,6 +40,25 @@ const chatReducer = createReducer(initialState, (builder) => {
   builder.addCase(createGroup.fulfilled, (state, action) => {
     console.log('action.payload: ^^^^createGroup', action.payload);
     state.chats = [...state.chats, action.payload];
+  });
+
+  builder.addCase(addToGroup.fulfilled, (state, action) => {
+    state.selectedChat = null;
+    state.selectedChat = action.payload;
+  });
+  builder.addCase(removeFromGroup.fulfilled, (state, action) => {
+    const { removedUserId, loggedInUserId, ...payload } = action.payload;
+
+    if (removedUserId === loggedInUserId) {
+      state.selectedChat = null;
+      return;
+    }
+    state.selectedChat = payload;
+  });
+
+  builder.addCase(renameGroup.fulfilled, (state, action) => {
+    state.selectedChat = null;
+    state.selectedChat = action.payload;
   });
 });
 

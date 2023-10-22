@@ -34,9 +34,10 @@ const MyChatList = ({ fetchAgain }: Props) => {
                 color: selectedChat === chat ? 'white' : 'black',
               }}
               onClick={accessChat(chat)}
+              key={chat._id}
             >
               <Typography variant="body1">
-                {!chat.isGroupChat ? getSender(user, chat.users) : chat.chatName}
+                {!chat.isGroupChat ? getSender(user, chat.users) : chat.chatName} 7777
               </Typography>
               {/* {chat.latestMessage && (
               <Typography fontSize="xs">
