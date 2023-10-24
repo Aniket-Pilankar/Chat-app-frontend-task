@@ -1,4 +1,5 @@
 import React, { ChangeEvent, KeyboardEventHandler, useCallback, useEffect, useState } from 'react';
+import Lottie from 'react-lottie';
 
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import {
@@ -15,15 +16,16 @@ import io, { Socket } from 'socket.io-client';
 
 import { getMessagesById, sendMessageRequest } from '../../db/chat/thunk-request';
 import { API } from '../../db/shared/api-response';
-import { useAppDispatch } from '../../db/types';
+import { SelectedChat, useAppDispatch } from '../../db/types';
 import { getSender } from '../../utils/helper';
 import ScrollableChat from '../ScrollableChat';
 import UpdateGroupChatModal from '../UpdateGroupChatModal';
+import { defaultOptions } from './constants';
 import { StyledStack, StyledWrapper } from './styles';
 import useSingleChatVMProps from './vm';
 
 const ENDPOINT = 'http://localhost:4001';
-let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
+let socket: Socket<DefaultEventsMap, DefaultEventsMap>, selectedChatCompare: SelectedChat | null;
 
 interface Props {
   fetchAgain: boolean;
@@ -39,11 +41,29 @@ const SingleChat = ({ fetchAgain, setFetchAgain }: Props) => {
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [socketConnected, setSocketConnected] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [istyping, setIsTyping] = useState(false);
 
   const typingHandler = (e: ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
 
     if (!socketConnected) return;
+    if (!selectedChat) return;
+
+    if (!typing) {
+      setTyping(true);
+      socket.emit('typing', selectedChat._id);
+    }
+    let lastTypingTime = new Date().getTime();
+    var timerLength = 3000;
+    setTimeout(() => {
+      var timeNow = new Date().getTime();
+      var timeDiff = timeNow - lastTypingTime;
+      if (timeDiff >= timerLength && typing) {
+        socket.emit('stop typing', selectedChat._id);
+        setTyping(false);
+      }
+    }, timerLength);
   };
 
   const fetchMessages = useCallback(async () => {
@@ -56,7 +76,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }: Props) => {
 
       setMessages(data);
 
-      // socket.emit('join chat', selectedChat._id);
+      socket.emit('join chat', selectedChat._id);
     } catch (error) {
       console.log('error:', error);
     } finally {
@@ -70,6 +90,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }: Props) => {
       return;
     }
     if (event.key === 'Enter' && newMessage) {
+      socket.emit('stop typing', selectedChat._id);
       try {
         setNewMessage('');
         console.log('newMessage:', newMessage);
@@ -80,7 +101,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }: Props) => {
             chatId: selectedChat._id,
           }),
         ).unwrap();
-        // socket.emit('new message', data);
+        socket.emit('new message', data);
         setMessages([...messages, data]);
       } catch (error) {
         console.log('error:', error);
@@ -89,25 +110,32 @@ const SingleChat = ({ fetchAgain, setFetchAgain }: Props) => {
   };
 
   useEffect(() => {
-    fetchMessages();
-  }, [fetchMessages, selectedChat]);
-
-  useEffect(() => console.log(messages), [messages]);
-
-  useEffect(() => {
     socket = io(ENDPOINT);
     socket.emit('setup', user);
     console.log(user?._id);
     socket.on('connected', () => setSocketConnected(true));
 
-    // eslint-disable-next-line
-  }, []);
+    socket.on('typing', () => setIsTyping(true));
+    socket.on('stop typing', () => setIsTyping(false));
+  }, [user]);
 
-  // useEffect(() => {
-  //   socket.on('message recieved', (newMessageRecieved) => {
-  //     setMessages([...messages, newMessageRecieved]);
-  //   });
-  // });
+  useEffect(() => {
+    fetchMessages();
+    selectedChatCompare = selectedChat;
+  }, [fetchMessages, selectedChat]);
+
+  useEffect(() => console.log(messages), [messages]);
+
+  useEffect(() => {
+    socket.on('message recieved', (newMessageRecieved) => {
+      console.log('In message recieved message recieved message recieved^^^^^');
+      if (!selectedChatCompare || selectedChatCompare._id !== newMessageRecieved.chat._id) {
+        alert('newMessageRecieved');
+      } else {
+        setMessages([...messages, newMessageRecieved]);
+      }
+    });
+  });
 
   if (!selectedChat) return <Typography variant="h5">Click on a user to start chatting</Typography>;
 
@@ -134,6 +162,18 @@ const SingleChat = ({ fetchAgain, setFetchAgain }: Props) => {
           </StyledWrapper>
         )}
         <FormControl variant="filled" onKeyDown={sendMessage}>
+          {istyping ? (
+            <div>
+              <Lottie
+                options={defaultOptions}
+                height={30}
+                width={70}
+                style={{ marginBottom: 15, marginLeft: 0 }}
+              />
+            </div>
+          ) : (
+            <></>
+          )}
           <TextField placeholder="Enter a message.." value={newMessage} onChange={typingHandler} />
         </FormControl>
       </StyledStack>

@@ -32,6 +32,7 @@ export default function useMyChatListVM({ fetchAgain }: VMProps) {
   const user = session?.user;
 
   const accessChat = (chat: SelectedChat) => () => {
+    console.log('accessChat is called');
     dispatch(selectedChatCreateAction(chat));
   };
 

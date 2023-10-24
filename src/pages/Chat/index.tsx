@@ -11,6 +11,8 @@ import useChatVM from './vm';
 
 const Chat = () => {
   const { session } = useChatVM();
+
+  // so if group is deleted then there should , then the name of the group should also deleted from the chatList
   const [fetchAgain, setFetchAgain] = useState(false);
 
   if (!session?.token) return <Navigate to={routes.home} />;
