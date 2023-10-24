@@ -37,7 +37,7 @@ const MyChatList = ({ fetchAgain }: Props) => {
               key={chat._id}
             >
               <Typography variant="body1">
-                {!chat.isGroupChat ? getSender(user, chat.users) : chat.chatName} 7777
+                {!chat.isGroupChat ? getSender(user, chat.users) : chat.chatName}
               </Typography>
               {/* {chat.latestMessage && (
               <Typography fontSize="xs">

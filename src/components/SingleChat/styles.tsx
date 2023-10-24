@@ -5,7 +5,7 @@ export const StyledStack = styled((props: StackProps) => (
 ))(({ theme }) => ({
   padding: theme.spacing(1),
   width: '100%',
-  height: '100%',
+  height: '95%',
   overflowY: 'hidden',
   backgroundColor: '#E8E8E8',
 }));
