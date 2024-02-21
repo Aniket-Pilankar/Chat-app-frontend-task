@@ -2,6 +2,8 @@ import { ChangeEvent, FormEvent, useState } from 'react';
 
 import { trySignIn } from '../../db/auth/thunk-request';
 import { useAppDispatch } from '../../db/types';
+import { useNavigate } from 'react-router-dom';
+import { routes } from '../../pages/routes';
 
 const initialState = {
   name: '',
@@ -30,7 +32,12 @@ export default function useSignUpVM() {
 
     console.log('formData', formData);
 
-    await dispatch(trySignIn(formData));
+    try {
+      const response = await dispatch(trySignIn(formData)).unwrap();
+      alert(`${formData.name} your account has been created. Please login In`);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return {
